@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -21,6 +22,7 @@ import static com.wagner.springsecurityamigos.security.ApplicationUserRole.*;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor(onConstructor=@__(@Autowired))
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
@@ -32,10 +34,24 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/**").hasRole(STUDENT.name())
-                .antMatchers(HttpMethod.DELETE, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
-                .antMatchers(HttpMethod.POST, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
-                .antMatchers(HttpMethod.PUT, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
-                .antMatchers(HttpMethod.GET, "/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
+
+//=================================================================================================================
+//              ATENÇÃO A ORDEM EM QUE .antMatchers é colocada é importante.
+//              vide explicação em   https://www.youtube.com/watch?v=her_7pa0vrg
+//              no seguinte trecho: 1:48:37 - ORDER DOES MATTER
+//=================================================================================================================
+
+//=================================================================================================================
+//                  ESTE CÓDIGO FOI SUBSTITUIDO PELA ANOTAÇÃO @EnableGlobalMethodSecurity (ESTÁ NO INICIO DESTA CLASSE)
+//                 E PELAS ANOTAÇÕES @PreAuthorize (ESTÁ NA CLASSE StudentManagementController)
+//
+//                .antMatchers(HttpMethod.DELETE, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
+//                .antMatchers(HttpMethod.POST, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
+//                .antMatchers(HttpMethod.PUT, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
+//                .antMatchers(HttpMethod.GET, "/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
+//=================================================================================================================
+
+
                 .anyRequest()
                 .authenticated()
                 .and()
