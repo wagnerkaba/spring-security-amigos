@@ -32,6 +32,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         http
 //               SE DEIXAR CSRF HABILITADO, O SPRING GERA UM TOKEN CSRF QUE É GRAVADO EM UM COOKIE
 //               E QUE TEM QUE SER RETORNADO EM QUALQUER REQUEST
+//                https://docs.spring.io/spring-security/site/docs/5.0.x/reference/html/csrf.html
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
@@ -57,7 +58,10 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()
                 .authenticated()
                 .and()
-                .httpBasic();
+                .formLogin()
+                .loginPage("/inicio/login").permitAll(); // endereço da pagina de login
+
+//               .httpBasic();  // Basic Auth: tem que fornecer login e senha para qualquer request
     }
 
 
