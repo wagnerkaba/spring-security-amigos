@@ -33,10 +33,12 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 //               SE DEIXAR CSRF HABILITADO, O SPRING GERA UM TOKEN CSRF QUE É GRAVADO EM UM COOKIE
 //               E QUE TEM QUE SER RETORNADO EM QUALQUER REQUEST
 //                https://docs.spring.io/spring-security/site/docs/5.0.x/reference/html/csrf.html
+
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/**").hasRole(STUDENT.name())
+                .antMatchers("/courses").permitAll()
 
 //=================================================================================================================
 //              ATENÇÃO A ORDEM EM QUE .antMatchers é colocada é importante.
@@ -59,9 +61,13 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticated()
                 .and()
                 .formLogin()
-                .loginPage("/inicio/login").permitAll(); // endereço da pagina de login
+//                .loginPage("/inicio/login").permitAll() // endereço da pagina de login
+                .defaultSuccessUrl("/courses", true);
+
 
 //               .httpBasic();  // Basic Auth: tem que fornecer login e senha para qualquer request
+
+
     }
 
 
@@ -71,22 +77,24 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     protected UserDetailsService userDetailsService() {
         UserDetails anaUser = User.builder()
                 .username("ana")
-                .password(passwordEncoder.encode("password"))
+                .password(passwordEncoder.encode("pass"))
 //                .roles(STUDENT.name()) //ROLE_STUDENT
                 .authorities(STUDENT.getGrantedAuthorities())
                 .build();
         UserDetails lindaUser = User.builder()
                 .username("linda")
-                .password(passwordEncoder.encode("password"))
+                .password(passwordEncoder.encode("pass"))
 //                .roles(ADMIN.name()) //ROLE_ADMIN
                 .authorities(ADMIN.getGrantedAuthorities())
                 .build();
         UserDetails tomUser = User.builder()
                 .username("tom")
-                .password(passwordEncoder.encode("password"))
+                .password(passwordEncoder.encode("pass"))
 //                .roles(ADMINTRAINEE.name()) //ROLE_ADMINTRAINEE
                 .authorities(ADMINTRAINEE.getGrantedAuthorities())
                 .build();
+
+        System.out.println("userDetailsService");
 
         return new InMemoryUserDetailsManager(
                 anaUser, lindaUser, tomUser
