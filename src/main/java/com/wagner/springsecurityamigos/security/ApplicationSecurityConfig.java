@@ -39,6 +39,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/**").hasRole(STUDENT.name())
                 .antMatchers("/courses").permitAll()
+                .antMatchers("/autenticado").permitAll()
 
 //=================================================================================================================
 //              ATENÇÃO A ORDEM EM QUE .antMatchers é colocada é importante.
@@ -62,7 +63,14 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin()
 //                .loginPage("/inicio/login").permitAll() // endereço da pagina de login
+//                .passwordParameter("password")
+//                .usernameParameter("username")
+//                .successForwardUrl("/courses");
                 .defaultSuccessUrl("/courses", true);
+
+        // TODO: a pagina de login customizada não está funcionando para autenticar usuário
+        // aparentemente este é um problema do maven:
+        // https://stackoverflow.com/questions/50891174/custom-login-form-is-not-working-using-spring-security
 
 
 //               .httpBasic();  // Basic Auth: tem que fornecer login e senha para qualquer request

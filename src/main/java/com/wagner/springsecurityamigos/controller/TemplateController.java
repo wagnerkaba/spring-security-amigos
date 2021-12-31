@@ -26,5 +26,20 @@ public class TemplateController {
 
 
 
+//  endpoint de teste para verificar se o usuário está autenticado ou não no sistema
+    @GetMapping("/autenticado")
+    public String getAutenticado(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!(auth instanceof AnonymousAuthenticationToken)) {
+            System.out.println(auth.getPrincipal());
+            System.out.println("AUTENTICADO");
+            return "courses";
+        }
+        System.out.println("NÃO autenticado");
+        return "pagina_de_login";
+    }
+
+
+
 
 }
