@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static com.wagner.springsecurityamigos.security.ApplicationUserPermission.COURSE_WRITE;
 import static com.wagner.springsecurityamigos.security.ApplicationUserRole.*;
@@ -38,7 +39,6 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/**").hasRole(STUDENT.name())
-                .antMatchers("/courses").permitAll()
                 .antMatchers("/autenticado").permitAll()
                 .antMatchers("/inicio/login").permitAll()
 
@@ -62,11 +62,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()
                 .authenticated()
                 .and()
-                .formLogin()
-//                .loginPage("/inicio/login") // endereço da pagina de login
-//                .passwordParameter("password")
-//                .usernameParameter("username")
-//                .successForwardUrl("/courses");
+                .formLogin().permitAll()
                 .defaultSuccessUrl("/courses", true);
 
         // TODO: a pagina de login customizada não está funcionando para autenticar usuário
