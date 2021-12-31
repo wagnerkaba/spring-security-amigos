@@ -40,6 +40,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/**").hasRole(STUDENT.name())
                 .antMatchers("/courses").permitAll()
                 .antMatchers("/autenticado").permitAll()
+                .antMatchers("/inicio/login").permitAll()
 
 //=================================================================================================================
 //              ATENÇÃO A ORDEM EM QUE .antMatchers é colocada é importante.
@@ -62,7 +63,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticated()
                 .and()
                 .formLogin()
-//                .loginPage("/inicio/login").permitAll() // endereço da pagina de login
+//                .loginPage("/inicio/login") // endereço da pagina de login
 //                .passwordParameter("password")
 //                .usernameParameter("username")
 //                .successForwardUrl("/courses");
