@@ -9,8 +9,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.PortResolverImpl;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.crypto.SecretKey;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +26,8 @@ import java.util.Date;
 public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
+    private final JwtConfig jwtConfig;
+    private final SecretKey secretKey;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -57,18 +61,18 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
                                             FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
 
-        String key = "assinatura_muito_segura_para_o_token_JWT";
+
 
         // CRIA O TOKEN JWT
         String tokenJwt = Jwts.builder()
                 .setSubject(authResult.getName()) // O token jwt deve conter o nome do usuário
                 .claim("authorities", authResult.getAuthorities())
                 .setIssuedAt(new Date()) // data em que o token foi gerado
-                .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusYears(1))) // token expira em um ano
-                .signWith(Keys.hmacShaKeyFor(key.getBytes())) //gera a assinatura do token jwt
+                .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(jwtConfig.getTokenExpirationAfterDays())))
+                .signWith(secretKey) //gera a assinatura do token jwt
                 .compact(); //Finally, we are compacting it into its final String form. A signed JWT is called a 'JWS'. (vide: https://github.com/jwtk/jjwt)
 
         // adiciona o token jwt no header do response
-        response.addHeader("Authorization", "Bearer " + tokenJwt);
+        response.addHeader(jwtConfig.getAuthorizationHeader(), jwtConfig.getTokenPrefix() + tokenJwt);
     }
 }

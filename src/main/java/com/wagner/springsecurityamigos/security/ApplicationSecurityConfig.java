@@ -2,6 +2,7 @@ package com.wagner.springsecurityamigos.security;
 
 
 import com.wagner.springsecurityamigos.auth.ApplicationUserService;
+import com.wagner.springsecurityamigos.jwt.JwtConfig;
 import com.wagner.springsecurityamigos.jwt.JwtTokenVerifier;
 import com.wagner.springsecurityamigos.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import javax.crypto.SecretKey;
+
 import static com.wagner.springsecurityamigos.security.ApplicationUserPermission.COURSE_WRITE;
 import static com.wagner.springsecurityamigos.security.ApplicationUserRole.*;
 
@@ -33,8 +36,9 @@ import static com.wagner.springsecurityamigos.security.ApplicationUserRole.*;
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
-
     private final ApplicationUserService applicationUserService;
+    private final SecretKey secretKey;
+    private final JwtConfig jwtConfig;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -47,8 +51,8 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //JWT é stateless
                 .and()
-                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager())) //filtro utilizado quando o usuário tenta se autenticar
-                .addFilterAfter(new JwtTokenVerifier(), JwtUsernameAndPasswordAuthenticationFilter.class) //filtro para verificar se o token jwt é válido
+                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, secretKey)) //filtro utilizado quando o usuário tenta se autenticar
+                .addFilterAfter(new JwtTokenVerifier(secretKey,jwtConfig), JwtUsernameAndPasswordAuthenticationFilter.class) //filtro para verificar se o token jwt é válido
                 .authorizeRequests()
                 .antMatchers("/**", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/**").hasRole(STUDENT.name())

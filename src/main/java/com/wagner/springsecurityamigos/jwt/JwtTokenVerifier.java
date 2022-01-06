@@ -6,12 +6,15 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.crypto.SecretKey;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -23,7 +26,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor(onConstructor=@__(@Autowired))
 public class JwtTokenVerifier extends OncePerRequestFilter {
+
+    private final SecretKey secretKey;
+    private final JwtConfig jwtConfig;
+
 
 
     // FILTRO QUE ANALISA O TOKEN JWT DE CADA REQUEST
@@ -33,10 +41,10 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         // Captura o header
-        String authorizationHeader = request.getHeader("Authorization");
+        String authorizationHeader = request.getHeader(jwtConfig.getAuthorizationHeader());
 
         // se o header estiver vazio ou não tiver a palavra "Bearer ", o request será rejeitado
-        if (Strings.isNullOrEmpty(authorizationHeader) || !authorizationHeader.startsWith("Bearer ")) {
+        if (Strings.isNullOrEmpty(authorizationHeader) || !authorizationHeader.startsWith(jwtConfig.getTokenPrefix())) {
 
             filterChain.doFilter(request, response);
             return;
@@ -45,16 +53,12 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
         // o authorizationHeader vem com a palavra "Bearer "
         // O comando abaixo retira a palavra "Bearer " para que o string "token" contenha apenas o token jwt
-        String token = authorizationHeader.replace("Bearer ", "");
+        String token = authorizationHeader.replace(jwtConfig.getTokenPrefix(), "");
 
         try {
 
-
-
-            String secretKey = "assinatura_muito_segura_para_o_token_JWT";
-
             Jws<Claims> claimsJws = Jwts.parser()
-                    .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                    .setSigningKey(secretKey)
                     .parseClaimsJws(token);
 
             // captura o body do token
