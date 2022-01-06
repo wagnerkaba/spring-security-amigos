@@ -2,6 +2,7 @@ package com.wagner.springsecurityamigos.security;
 
 
 import com.wagner.springsecurityamigos.auth.ApplicationUserService;
+import com.wagner.springsecurityamigos.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -41,11 +43,16 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 //                https://docs.spring.io/spring-security/site/docs/5.0.x/reference/html/csrf.html
 
                 .csrf().disable()
+                .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //JWT é stateless
+                .and()
+                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager())) //adiciona o filter JWT na segurança
                 .authorizeRequests()
-                .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
+                .antMatchers("/**", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/**").hasRole(STUDENT.name())
-                .antMatchers("/autenticado").permitAll()
-                .antMatchers("/inicio/login").permitAll()
+                .anyRequest()
+                .authenticated();
+
 
 //=================================================================================================================
 //              ATENÇÃO A ORDEM EM QUE .antMatchers é colocada é importante.
@@ -63,19 +70,19 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .antMatchers(HttpMethod.GET, "/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
 //=================================================================================================================
 
+//=================================================================================================================
+//               FORM LOGIN DESABILITADO PARA USAR O JWT AUTHENTICATION
+//=================================================================================================================
+//                .and()
+//                .formLogin().permitAll()
+//                .defaultSuccessUrl("/courses", true);
+//=================================================================================================================
 
-                .anyRequest()
-                .authenticated()
-                .and()
-                .formLogin().permitAll()
-                .defaultSuccessUrl("/courses", true);
-
-        // TODO: a pagina de login customizada não está funcionando para autenticar usuário
-        // aparentemente este é um problema do maven:
-        // https://stackoverflow.com/questions/50891174/custom-login-form-is-not-working-using-spring-security
-
-
+//=================================================================================================================
+//      BASIC AUTH UTILIZADO NA PRIMEIRA PARTE DO CURSO ANTES DO FORM LOGIN
+//=================================================================================================================
 //               .httpBasic();  // Basic Auth: tem que fornecer login e senha para qualquer request
+//=================================================================================================================
 
 
     }
