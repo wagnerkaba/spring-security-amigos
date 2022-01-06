@@ -2,6 +2,7 @@ package com.wagner.springsecurityamigos.security;
 
 
 import com.wagner.springsecurityamigos.auth.ApplicationUserService;
+import com.wagner.springsecurityamigos.jwt.JwtTokenVerifier;
 import com.wagner.springsecurityamigos.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,8 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //JWT é stateless
                 .and()
-                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager())) //adiciona o filter JWT na segurança
+                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager())) //filtro utilizado quando o usuário tenta se autenticar
+                .addFilterAfter(new JwtTokenVerifier(), JwtUsernameAndPasswordAuthenticationFilter.class) //filtro para verificar se o token jwt é válido
                 .authorizeRequests()
                 .antMatchers("/**", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/**").hasRole(STUDENT.name())

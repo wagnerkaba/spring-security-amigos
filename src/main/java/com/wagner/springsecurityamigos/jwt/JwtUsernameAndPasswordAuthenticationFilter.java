@@ -66,7 +66,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
                 .setIssuedAt(new Date()) // data em que o token foi gerado
                 .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusYears(1))) // token expira em um ano
                 .signWith(Keys.hmacShaKeyFor(key.getBytes())) //gera a assinatura do token jwt
-                .compact();
+                .compact(); //Finally, we are compacting it into its final String form. A signed JWT is called a 'JWS'. (vide: https://github.com/jwtk/jjwt)
 
         // adiciona o token jwt no header do response
         response.addHeader("Authorization", "Bearer " + tokenJwt);
